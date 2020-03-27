@@ -89,8 +89,8 @@ void console_printf(int newline, const char *format, ...)
 			if (logfile != NULL)
 			{
 				fprintf(logfile, "%s\n", tmp);
+				fclose(logfile);
 			}
-			fclose(logfile);
 		}
 		
 	}

@@ -6,6 +6,7 @@ Restore your vWii NAND backups from your Wii U
 - Copy the .elf to sd:/wiiu/apps
 - Run cfw (mocha or haxchi)
 
+I recommend doing a slccmpt + otp backup with [Wii U Nand dumper](https://github.com/koolkdev/wiiu-nanddumper/releases) before using this tool.
 Please make sure that the `keys.bin/otp.bin` are from the console where the NAND Backup is from or else decryption will fail!
 
 ###### Restore NAND
