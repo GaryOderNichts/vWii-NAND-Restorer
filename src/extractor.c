@@ -293,7 +293,16 @@ fst_t getFST(uint16_t entry)
 	fst.sib = sib;
 
 	uint32_t size;
-	fread(&size, sizeof(uint32_t), 1, rom);
+	if ((entry + 1) % 64 == 0) //the entry for every 64th fst item is inturrupeted
+	{
+		fread(&size, 2, 1, rom);
+		fseek(rom, 0x40, SEEK_CUR);
+		fread((char*) (&size) + 2, 2, 1, rom);
+	}
+	else
+	{
+		fread(&size, sizeof(uint32_t), 1, rom);
+	}
 	size = bswap32(size);
 	fst.size = size;
 
