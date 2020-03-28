@@ -103,6 +103,7 @@ uint8_t getFileType(void)
 	rewind(rom);
 	fseek(rom, 0, SEEK_END);
 	uint64_t lenght = ftell(rom);
+	console_printf(1, "File size: %llu", lenght);
 	switch (lenght)
 	{
 	case PAGE_SIZE * 8 * CLUSTERS_COUNT:
@@ -113,8 +114,7 @@ uint8_t getFileType(void)
 		return 1;
 	case (PAGE_SIZE + SPARE_SIZE) * 8 * CLUSTERS_COUNT + 0x400:
 		fileType = BootMii;
-		console_printf(1, "Wii backup detected! Do not restore a Wii backup to your vWii!");
-		return 0; 
+		return 1; 
 	default:
 		console_printf(1, "Error determining File type!");
 		return 0;
@@ -190,7 +190,10 @@ byte_t* readKeyfile(char* path)
 
 	FILE* keyfile = fopen(path, "rb");
 	if (keyfile == NULL)
+	{	
+		free(retval);
 		return NULL;
+	}
 
 	fseek(keyfile, 0x158, SEEK_SET);
 	fread(retval, sizeof(byte_t), 16, keyfile);
@@ -223,28 +226,45 @@ byte_t* readOTP(char* path)
 
 int32_t findSuperblock(void)
 {
-	int32_t loc = ((nandType == Wii) ? 0x7F00 : 0x7C00) * getClusterSize();
-	int32_t end = CLUSTERS_COUNT * getClusterSize();
-	int32_t len = getClusterSize() * 0x10;
-	int32_t current, last = 0;
+	uint32_t loc = ((nandType == Wii) ? 0x7F00 : 0x7C00) * getClusterSize();
+	uint32_t end = CLUSTERS_COUNT * getClusterSize();
+	uint32_t len = getClusterSize() * 0x10;
+	uint32_t current, magic, last = 0;
 
-	rewind(rom);
-	fseek(rom, loc + 4, SEEK_SET);
-
+	uint8_t irewind = 1;
 	for (; loc < end; loc += len)
 	{
-		fread(&current, sizeof(uint32_t), 1, rom);
+		rewind(rom);
+		fseek(rom, loc, SEEK_SET);
+		fread(&magic, 4, 1, rom);
+		if (magic != 0x53464653)
+		{
+			console_printf(1, "Finding superblock... this is not a supercluster");
+			irewind++;
+			continue;
+		}
+
+		fread(&current, 4, 1, rom);
 		current = bswap32(current);
 
 		if (current > last)
 			last = current;
 		else
-			return loc - len;
+		{
+			irewind = 1;
+			break;
+		}
 
-		fseek(rom, len - 4, SEEK_CUR);
+		if (loc == end)
+			irewind = 1;
 	}
 
-	return -1;
+	if (!last)
+		return -1;
+
+	loc -= len * irewind;
+
+	return loc;
 }
 
 fst_t getFST(uint16_t entry)
