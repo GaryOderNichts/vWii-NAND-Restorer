@@ -274,7 +274,7 @@ int Menu_Main(void)
 			OSScreenClearBufferEx(0, 0);
 			OSScreenClearBufferEx(1, 0);
 
-			console_print_pos(0, 0, "vWii NAND Restorer v1 by GaryOderNichts");
+			console_print_pos(0, 0, "vWii NAND Restorer v2 by GaryOderNichts");
 
 			console_print_pos(0, 2, "Place your vWii NAND Backup to %s", NAND_FILE_PATH);
 
