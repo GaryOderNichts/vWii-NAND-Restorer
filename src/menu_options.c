@@ -23,14 +23,14 @@ uint8_t OPTION_restoreNand(int fsaFd)
 	
 	console_printf(1, "Extracting NAND to SLCCMPT");
 
-	extractNand("dev:");
+	extractNand("dev:", 1, fsaFd);
 	cleanup();
 
-	if (OPTION_fixModes(fsaFd))
-		return 1;
+	// if (OPTION_fixModes(fsaFd))
+	// 	return 1;
 
-	console_printf(1, "Error fixing modes!");
-	return 0;
+	// console_printf(1, "Error fixing modes!");
+	return 1;
 }
 
 uint8_t OPTION_extractNand(void)
@@ -44,7 +44,7 @@ uint8_t OPTION_extractNand(void)
 			if (!removeRecursive(EXTRACTED_NAND_PATH))
 				return 0;
 		
-		extractNand(EXTRACTED_NAND_PATH);
+		extractNand(EXTRACTED_NAND_PATH, 0, 0);
 		cleanup();
 		return 1;
 	}
