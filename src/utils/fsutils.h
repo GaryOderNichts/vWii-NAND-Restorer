@@ -7,7 +7,6 @@ uint8_t removeRecursive(const char* path);
 uint8_t dirExists(const char* path);
 uint8_t fileExists(const char* path);
 uint8_t chmodRecursive(int fsaFd, char *pPath, int mode);
-uint8_t chmodSingle(int fsaFd, char *pPath, int mode);
 uint8_t copyDir(const char* src, const char* dst);
 
 #endif

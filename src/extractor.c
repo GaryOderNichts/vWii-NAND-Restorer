@@ -29,7 +29,6 @@
 #include <sys/stat.h>
 #include "dynamic_libs/fs_functions.h"
 #include "utils/stringutils.h"
-#include "utils/fsutils.h"
 
 byte_t* key;
 FILE* rom;
@@ -322,14 +321,12 @@ fst_t getFST(uint16_t entry)
 	x3 = bswap32(x3);
 	fst.x3 = x3;
 
-	//fst.mode &= 1;
+	fst.mode &= 1;
 
 	return fst;
 }
 
-uint8_t modesFromNand = 0;
-int fsaFd = 0;
-void extractNand(const char* dest, uint8_t _modesFromNand, int _fsaFd)
+void extractNand(const char* dest)
 {
 	if (initSuccess != 1 || rom == NULL)
 	{
@@ -337,16 +334,11 @@ void extractNand(const char* dest, uint8_t _modesFromNand, int _fsaFd)
 		return;
 	}
 	
-	modesFromNand = _modesFromNand;
-	fsaFd = _fsaFd;
-
 	char* _outNandDst = malloc(FS_MAX_FULLPATH_SIZE);
 	strcpy(_outNandDst, dest);
 	outNandDst = _outNandDst;
 
-	if (strcmp(dest, "dev:") != 0)	
-		mkdir(outNandDst, 0777);
-
+	mkdir(outNandDst, 0777);
 	extractFST(0, "");
 }
 
@@ -398,7 +390,7 @@ void extractFST(uint16_t entry, char* parent)
 	if (fst.sib != 0xffff)
 		extractFST(fst.sib, parent);
 
-	switch (fst.mode & 1)
+	switch (fst.mode)
 	{
 	case 0:
 		extractDir(fst, entry, parent);
@@ -446,8 +438,6 @@ void extractDir(fst_t fst, uint16_t entry, char* parent)
 
 		mkdir(path, 0777);
 		
-		if (modesFromNand)
-			chmodSingle(fsaFd, path, getModeForChmod(fst.mode));
 	}
 	else
 	{
@@ -508,9 +498,6 @@ void extractFile(fst_t fst, uint16_t entry, char* parent)
 	fwrite(data, fst.size, 1, bf);
 	fclose(bf);
 
-	if (modesFromNand)
-		chmodSingle(fsaFd, path, getModeForChmod(fst.mode));
-
 	free(data);
 	free(filename);
 	free(path);
@@ -554,21 +541,4 @@ uint32_t bswap32(uint32_t value)
 	// 					| ((0x00FF0000) & (value << 8))
 	// 					| ((0xFF000000) & (value << 24)));
 	// return swapped;
-}
-
-int getModeForChmod(byte_t mode)
-{
-	const int permi[3] = {0, 4, 2}; //"-", "r", "w"
-	int users[3] = {0}; // owner, group, other
-
-	for( uint16_t i = 0; i < 3; i++ )
-	{
-		users[i] = permi[ ( mode >> 6 ) & 1 ] + permi[ ( mode >> 6 ) & 2 ] + 0;
-		mode <<= 2;
-	}
-	char* modestring = calloc(3 + 1, sizeof(char));
-	snprintf(modestring, 3 + 1, "%01X%01X%01X", users[0], users[1], users[2]);
-	int outmode = strtoul(modestring, NULL, 16);
-	free(modestring);
-	return outmode;
 }

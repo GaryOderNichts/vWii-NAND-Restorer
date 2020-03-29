@@ -149,26 +149,6 @@ uint8_t chmodRecursive(int fsaFd, char *pPath, int mode)
 	return 1;
 }
 
-uint8_t chmodSingle(int fsaFd, char *pPath, int mode)
-{
-	char* rootpath = calloc(FS_MAX_FULLPATH_SIZE, sizeof(char));
-	strcpy(rootpath, pPath);
-	stringReplace("dev:", SLCCMPT_MOUNT_PATH, rootpath);
-
-	int ret = IOSUHAX_FSA_ChangeMode(fsaFd, rootpath, mode);
-	if (ret < 0)
-	{
-		console_printf(1, "chmod 0x%X error %i for %s", mode, ret, pPath);
-	} 
-	else
-	{
-		console_printf(1, "chmod 0x%X successful for %s", mode, pPath);
-		return 1;
-	}
-
-	return 0;
-}
-
 uint8_t copyDir(const char* src, const char* dst)
 {
 	DIR* dir = opendir(src);
