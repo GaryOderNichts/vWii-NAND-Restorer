@@ -118,11 +118,11 @@ uint8_t chmodRecursive(int fsaFd, char *pPath, int mode)
 	struct dirent* entry;
 	while ((entry = readdir(dir)) != NULL)
 	{
-		char* path = calloc(FS_MAX_FULLPATH_SIZE, sizeof(char));
-		char* rootpath = calloc(FS_MAX_FULLPATH_SIZE, sizeof(char));
-
 		if(strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0)
 			continue;
+
+		char* path = calloc(FS_MAX_FULLPATH_SIZE, sizeof(char));
+		char* rootpath = calloc(FS_MAX_FULLPATH_SIZE, sizeof(char));
 
 		snprintf(path, FS_MAX_FULLPATH_SIZE, "%s/%s", pPath, entry->d_name);
 
@@ -143,6 +143,9 @@ uint8_t chmodRecursive(int fsaFd, char *pPath, int mode)
 		{
 			chmodRecursive(fsaFd, path, mode);
 		}    
+
+		free(path);
+		free(rootpath);
 	}
 	closedir(dir);
 
