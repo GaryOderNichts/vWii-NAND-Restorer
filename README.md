@@ -1,6 +1,8 @@
 # vWii-NAND-Restorer
 Restore your vWii NAND backups from your Wii U
 
+## Note: I recommend using [vWii Decaffeinator](https://github.com/GaryOderNichts/vWii-Decaffeinator) to restore (partially) bricked vWii's instead
+
 ## How to use
 - Copy your nand backup to `sd:/vwiinandrestorer/slccmpt.bin` and place your `keys.bin/otp.bin` in the same folder
 - Copy the .elf to sd:/wiiu/apps
